@@ -23,6 +23,9 @@ class CPU {
         void lui(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed);
         void j(std::uint32_t address);
 
+        // theoretically syscall should actually be part of os, not CPU
+        void syscall();
+
     public:
         std::uint32_t fetch(int pc);
         int exec(std::uint32_t instruction);

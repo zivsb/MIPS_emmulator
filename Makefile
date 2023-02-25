@@ -14,3 +14,4 @@ run: os
 
 clean: 
 	/bin/rm -f *.o out
+	clear
