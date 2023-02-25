@@ -1,7 +1,13 @@
-CXX=g++
+CXX=clang++
 
-main: main.o
-	${CXX} main.o -o out
+cpu.o: cpu.cpp
+	${CXX} -c cpu.cpp
+
+main.o: main.cpp
+	${CXX} -c main.cpp
+
+main: main.o cpu.o
+	${CXX} main.o cpu.o -o out
 
 run: main
 	./out
