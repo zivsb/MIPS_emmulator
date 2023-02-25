@@ -10,11 +10,11 @@ CPU::CPU(uint32_t* instruction, uint32_t* staticMem, uint32_t* pc) {
             this->pc = pc;        
 }
 
-void handleInvalid(int instruction){
+const void handleInvalid(int instruction){
     cout << "Invalid instruction: " << instruction << endl;
 }
 
-int CPU::exec(uint32_t instruction) {
+int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
     uint8_t opcode = (instruction & 0xFC000000) >> 26;
     uint8_t rs = (instruction & 0x03E00000) >> 21;
     uint8_t rt = (instruction & 0x001F0000) >> 16;
@@ -24,67 +24,72 @@ int CPU::exec(uint32_t instruction) {
     uint16_t immed = (instruction & 0x0000FFFF);
     uint32_t address = (instruction & 0x03FFFFFF);
 
-    switch (opcode) {
-        case 0x23:
-        // lw
-            lw(rs, rt, immed);
-            break;
-        case 0x2b:
-        // sw
-            sw(rs, rt, immed);
-            break;
-        case 0x8:
-        // addi
-            addi(rs, rt, immed);
-            break;
-        case 0xc:
-        // andi
-            andi(rs, rt, immed);
-            break;
-        case 0xd:
-        // ori
-            ori(rs, rt, immed);
-            break;
-        case 0x4:
-        // beq
-            beq(rs, rt, immed);
-            break;
-        case 0xf:
-            lui(rs, rt, immed);
-            break;
-        case 0x2:
-        // j
-            // j(address);
-            break;
-        case 0x0:
-        // R-Types
-            switch (func) {
-                case 0x20:
-                    add(rs, rt, rd);
-                    break;
-                case 0x24:
-                    andr(rs, rt, rd);
-                    break;
-                case 0x25:
-                    orr(rs, rt, rd);
-                    break;
-                case 0x27:
-                    nor(rs, rt, rd);
-                    break;
-                case 0x00:
-                    sll(rt, rd, shamt);
-                    break;
-                default:
-                    handleInvalid(instruction);
-            }
-            break;
-        default:
-            handleInvalid(instruction);
-        
-        
+    cout << "Executing: " << (instruction)  << endl;
+    try {
+        switch (opcode) {
+            case 0x23:
+            // lw
+                lw(rs, rt, immed);
+                break;
+            case 0x2b:
+            // sw
+                sw(rs, rt, immed);
+                break;
+            case 0x8:
+            // addi
+                addi(rs, rt, immed);
+                break;
+            case 0xc:
+            // andi
+                andi(rs, rt, immed);
+                break;
+            case 0xd:
+            // ori
+                ori(rs, rt, immed);
+                break;
+            case 0x4:
+            // beq
+                beq(rs, rt, immed);
+                break;
+            case 0xf:
+                lui(rs, rt, immed);
+                break;
+            case 0x2:
+            // j
+                // j(address);
+                break;
+            case 0x0:
+            // R-Types
+                switch (func) {
+                    case 0x20:
+                        add(rs, rt, rd);
+                        break;
+                    case 0x24:
+                        andr(rs, rt, rd);
+                        break;
+                    case 0x25:
+                        orr(rs, rt, rd);
+                        break;
+                    case 0x27:
+                        nor(rs, rt, rd);
+                        break;
+                    case 0x00:
+                        sll(rt, rd, shamt);
+                        break;
+                    default:
+                        throw (Error(1));
+                }
+                break;
+            default:
+                throw (Error(1));
+        }
+    } catch (Error e) {
+        throw e;
+    } catch (SuccessfulQuit s) {
+        throw s;
     }
 
-    cout << "Executed: " << (instruction)  << endl;
+    (*pc)++;
     return 0;
 }
 
@@ -145,13 +150,23 @@ void CPU::nor(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd) {
     regs[rd] = (regs[rs] ^ 0xFFFFFFFF) & (regs[rt] ^ 0xFFFFFFFF);
 }
 
-void CPU::sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt) {
-    if (shamt == 0 && rt == 0 && rd == 0) return syscall();
+void CPU::sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt) throw(SuccessfulQuit, Error) {
+    if (shamt == 0 && rt == 0 && rd == 0){ 
+        try {
+            syscall();
+        } catch (SuccessfulQuit s){
+            throw s;
+        } catch (Error e) {
+            throw e;
+        }
+
+        return;
+    };
     regs[rd] = regs[rt] >> shamt;
 }
 
 // theoretically should actually be part of os, not CPU
-void CPU::syscall() {
+void CPU::syscall() throw(SuccessfulQuit, Error){
     switch (regs[2]) {
         case 1:
             // print as int
@@ -161,6 +176,8 @@ void CPU::syscall() {
             // a0 used as memory tracker
             // v0 used as register to store the ascii value
             do {
+                // If a0 is outside of the memory limit throw memory oob error
+                if (regs[4] >= 100) throw (Error(2));
                 // load the value at a0 into v0
                 lw(4, 2, 0);
                 //  print the value of a0
@@ -168,5 +185,12 @@ void CPU::syscall() {
                 // increment a0
                 addi(4, 4, 1);
             } while (regs[2] != 0); // print chars until the null character
+            break;
+        case 5:
+            cin >> regs[2];
+            cout << endl;
+            break;
+        case 10:
+            throw (SuccessfulQuit());
     }
 }

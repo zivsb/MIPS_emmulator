@@ -1,5 +1,8 @@
-#ifndef cpu_h
-#define cpu_h
+#ifndef CPU_H
+#define CPU_H
+
+#include "exceptions/Error.h"
+#include "exceptions/SuccessfulQuit.h"
 
 class CPU {
     private:
@@ -18,17 +21,18 @@ class CPU {
         void orr(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd);
         void ori(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed);
         void nor(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd);
-        void sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt);
+        // sll calls syscall if all parameters are zero
+        void sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt) throw(SuccessfulQuit, Error);
         void beq(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed);
         void lui(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed);
         void j(std::uint32_t address);
 
         // theoretically syscall should actually be part of os, not CPU
-        void syscall();
+        void syscall() throw(SuccessfulQuit, Error);
 
     public:
         std::uint32_t fetch(int pc);
-        int exec(std::uint32_t instruction);
+        int exec(std::uint32_t instruction) throw(SuccessfulQuit, Error);
         CPU(std::uint32_t* instruction, std::uint32_t* staticMem, std::uint32_t* pc);
 
 };

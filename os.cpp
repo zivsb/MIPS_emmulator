@@ -34,14 +34,31 @@ int main() {
         pc++;
 
     } while(inptInstr != "quit");
+    pc = 0;
     
     // TODO: After full functionallity implemented reset program count to 0
     // Run the runtime loop until syscall w/ $v0 = 10 is called
-    pc -= 2;
-    for (int i = 0; i <= pc; i++) {
-        uint32_t instr = instructions[i];
-        processor->exec(processor->fetch(i));
+    
+    try {
+        do {
+            uint32_t instr = processor->fetch(pc);
+            processor->exec(instr);
+        } while(true);
+        
+    } catch (SuccessfulQuit s) {
+        cout << "Code Executed successfully and ended with pc = " << pc << endl;
+    } catch (Error e) {
+        cout << "Unsecusseful Exececution error of type: ";
+        switch(e.type) {
+            case 0:
+                cout << 0 << ". Unknown/specified error" << endl;
+                break;
+            case 1:
+                cout << 1 << ". Invalid instruction. Instruction: " << processor->fetch(pc) << endl;
+                break;
+            case 2:
+                cout << 2 << ". Memory out of bouds exception. Instruction: " << processor->fetch(pc) << endl;
+                break;
+        }
     }
-
-    pc = 0;
 }
