@@ -3,13 +3,13 @@ CXX=clang++
 cpu.o: cpu.cpp
 	${CXX} -c cpu.cpp
 
-main.o: main.cpp
-	${CXX} -c main.cpp
+os.o: os.cpp
+	${CXX} -c os.cpp
 
-main: main.o cpu.o
-	${CXX} main.o cpu.o -o out
+os: os.o cpu.o
+	${CXX} os.o cpu.o -o out
 
-run: main
+run: os
 	./out
 
 clean: 
