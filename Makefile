@@ -10,7 +10,7 @@ os: os.o cpu.o
 	${CXX} os.o cpu.o -o out
 
 run: os
-	./out
+	./out ./instructions.txt
 
 clean: 
 	/bin/rm -f *.o out

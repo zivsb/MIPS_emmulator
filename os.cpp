@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include "cpu.h"
@@ -10,15 +11,27 @@ using namespace std;
 
 uint32_t parseUint32(string inpt) {
     uint32_t retVal = 0;
-    for (int i = 0; i < inpt.length(); i++) {
-        retVal *= 10;
-        retVal += (int(inpt[i]) - 0x30) % 10;
+    int base = 10;
+    bool isDec = true;
+
+    if (int(inpt[1]) == 0x78) {
+        isDec = false;
+        base = 16;
+    } else if (int(inpt[1]) == 0x62) {
+        isDec = false;
+        base = 2;
+    }
+
+    for (int i = isDec ? 0 : 2; i < inpt.length(); i++) {
+        retVal *= base;
+        retVal += (int(inpt[i]) - 0x30 < 10) ? (int(inpt[i]) - 0x30) : ((int(inpt[i]) - 0x41) + 10);
+        // cout << inpt[i] << " converted to: " << ((int(inpt[i]) - 0x30 < 10) ? (int(inpt[i]) - 0x30) : ((int(inpt[i]) - 0x41) + 10)) << "\n";
     }
 
     return retVal;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     uint32_t instructions[100] = {0};
     uint32_t staticMem[16384] = {0};
     uint32_t pc = 0;
@@ -27,18 +40,35 @@ int main() {
 
     // Get the instructions from user input and store them into a vector
     string inptInstr;
-    do {
-        cout << "Enter the instruction as an uint32_t: ";
-        cin >> inptInstr;
-        instructions[pc] = parseUint32(inptInstr);
-        pc++;
+    if (argc < 2) {
+        // Get the input from a cin loop
+        cerr << "No input file provided, resorting to manual instruction entry." << endl;
+        do {
+            cout << "Enter the instruction " << pc <<": ";
+            cin >> inptInstr;
+            instructions[pc] = parseUint32(inptInstr);
+            pc++;
 
-    } while(inptInstr != "quit");
+        } while(inptInstr != "quit");
+    } else {
+        // Get the input from the input text file
+        ifstream file(argv[1]);
+        if (!file.is_open()) {
+            cerr << "Error: could not open file " << argv[1] << endl;
+            return 1;
+        }
+
+        string line;
+        getline(file, line);
+        do {
+            instructions[pc] = parseUint32(line);
+            pc++;
+        } while(getline(file, line));
+        file.close();
+    }
     pc = 0;
     
-    // TODO: After full functionallity implemented reset program count to 0
-    // Run the runtime loop until syscall w/ $v0 = 10 is called
-    
+    // Run loop with exit codes handling
     try {
         do {
             uint32_t instr = processor->fetch(pc);
