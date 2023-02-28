@@ -4,10 +4,12 @@
 using namespace std;
 
 
-CPU::CPU(uint32_t* instruction, uint32_t* staticMem, uint32_t* pc) {
-            this->instruction = instruction;
-            this->staticMem = staticMem;
-            this->pc = pc;        
+CPU::CPU(uint32_t* instruction, uint32_t* dynMem, uint32_t* pc) {
+    this->instruction = instruction;
+    this->dynMem = dynMem;
+    this->pc = pc;
+    // Setting sp to the top of the dynamic memory     
+    regs[29] = 16383;  
 }
 
 const void handleInvalid(int instruction){
@@ -25,7 +27,11 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
     uint32_t address = (instruction & 0x03FFFFFF);
 
     cout << "Executing: " << (instruction)  << endl;
+    
     try {
+
+        if (instruction == 0) syscall();
+
         switch (opcode) {
             case 0x23:
             // lw
@@ -51,12 +57,21 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
             // beq
                 beq(rs, rt, immed);
                 break;
+            case 0x5:
+            // beq
+                beq(rs, rt, immed);
+                break;
             case 0xf:
                 lui(rs, rt, immed);
                 break;
             case 0x2:
-            // j
-                // j(address);
+                j(address);
+                break;
+            case 0x3:
+                jal(address);
+                break;
+            case 0xA:
+                slti(rs, rt, immed);
                 break;
             case 0x0:
             // R-Types
@@ -75,6 +90,12 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
                         break;
                     case 0x00:
                         sll(rt, rd, shamt);
+                        break;
+                    case 0x8:
+                        jr(rs);
+                        break;
+                    case 0x2A:
+                        slt(rs, rt, rd);
                         break;
                     default:
                         throw (Error(1));
@@ -99,13 +120,13 @@ uint32_t CPU::fetch(int pc) {
 }
 
 void CPU::lw(uint8_t rs, uint8_t rt, uint16_t immed) {
-    regs[rt] = staticMem[immed + regs[rs]];
+    regs[rt] = dynMem[immed + regs[rs]];
     // cout << "The value of regs[" << (int) rt << "] is now " << regs[rt] << endl;
 }
 
 void CPU::sw(uint8_t rs, uint8_t rt, uint16_t immed) {
-    staticMem[immed + regs[rs]] = regs[rt];
-    // cout << "staticMem[" << immed + regs[rs] << "] is now: " << staticMem[immed + regs[rs]] << endl;
+    dynMem[immed + regs[rs]] = regs[rt];
+    // cout << "dynMem[" << immed + regs[rs] << "] is now: " << dynMem[immed + regs[rs]] << endl;
 }
 
 void CPU::addi(uint8_t rs, uint8_t rt, uint16_t immed) {
@@ -126,6 +147,20 @@ void CPU::beq(uint8_t rs, uint8_t rt, uint16_t immed) {
     }
 }
 
+void CPU::bne(uint8_t rs, uint8_t rt, uint16_t immed) {
+    if(regs[rs] != regs[rt]) {
+        *pc = immed;
+    }
+}
+
+void CPU::slti(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed) {
+    regs[rt] = (regs[rs] < immed);
+}
+
+void CPU::slt(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd) {
+    regs[rd] = (regs[rs] < regs[rt]);
+}
+
 void CPU::lui(uint8_t rs, uint8_t rt, uint16_t immed) {
     // cout << "Loading " << immed << " into " << rt << endl;
     regs[rt] = immed;
@@ -134,7 +169,6 @@ void CPU::lui(uint8_t rs, uint8_t rt, uint16_t immed) {
 
 // R-type instructions
 void CPU::add(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd) {
-    // Adding syscall to functionallity if all are zero
     regs[rd] = regs[rs] + regs[rt];
 }
 
@@ -150,20 +184,23 @@ void CPU::nor(std::uint8_t rs, std::uint8_t rt, std::uint8_t rd) {
     regs[rd] = (regs[rs] ^ 0xFFFFFFFF) & (regs[rt] ^ 0xFFFFFFFF);
 }
 
-void CPU::sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt) throw(SuccessfulQuit, Error) {
-    if (shamt == 0 && rt == 0 && rd == 0){ 
-        try {
-            syscall();
-        } catch (SuccessfulQuit s){
-            throw s;
-        } catch (Error e) {
-            throw e;
-        }
-
-        return;
-    };
+void CPU::sll(std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt) {
     regs[rd] = regs[rt] >> shamt;
 }
+
+void CPU::j(std::uint32_t address) {
+    *(pc) = address;
+}
+
+void CPU::jal(std::uint32_t address) {
+    regs[31] = *pc;
+    *(pc) = address;
+}
+
+void CPU::jr(std::uint8_t rs) {
+    *(pc) = regs[rs];
+}
+
 
 // theoretically should actually be part of os, not CPU
 void CPU::syscall() throw(SuccessfulQuit, Error){
@@ -188,7 +225,6 @@ void CPU::syscall() throw(SuccessfulQuit, Error){
             break;
         case 5:
             cin >> regs[2];
-            cout << endl;
             break;
         case 10:
             throw (SuccessfulQuit());

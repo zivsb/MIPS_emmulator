@@ -33,10 +33,10 @@ uint32_t parseUint32(string inpt) {
 
 int main(int argc, char* argv[]) {
     uint32_t instructions[100] = {0};
-    uint32_t staticMem[16384] = {0};
+    // TODO implement Big Endian addressing
+    uint32_t dynMem[16384] = {0};
     uint32_t pc = 0;
-    CPU* processor = new CPU(instructions, staticMem, &pc);
-    uint32_t registers[32] = {0};
+    CPU* processor = new CPU(instructions, dynMem, &pc);
 
     // Get the instructions from user input and store them into a vector
     string inptInstr;
