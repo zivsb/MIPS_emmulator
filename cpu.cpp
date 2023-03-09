@@ -30,8 +30,6 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
     
     try {
 
-        if (instruction == 0) syscall();
-
         switch (opcode) {
             case 0x23:
             // lw
@@ -76,6 +74,9 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
             case 0x0:
             // R-Types
                 switch (func) {
+                    case 0xC:
+                        syscall();
+                        break;
                     case 0x20:
                         add(rs, rt, rd);
                         break;
@@ -130,6 +131,7 @@ void CPU::sw(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::addi(uint8_t rs, uint8_t rt, uint16_t immed) {
+    cout << "In addi: " << regs[rt] << endl;
     regs[rt] = regs[rs] + immed;
 }
 
@@ -142,8 +144,12 @@ void CPU::ori(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::beq(uint8_t rs, uint8_t rt, uint16_t immed) {
+    cout << "Running beq" << endl;
+    cout << regs[rs] << " " << regs[rt] << endl;
+    cout << *pc << endl;
     if(regs[rs] == regs[rt]) {
         *pc = immed;
+        cout << "PC has been changed to " << *pc << endl;
     }
 }
 
@@ -154,6 +160,7 @@ void CPU::bne(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::slti(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed) {
+    cout << "In SLTI: " << regs[rs] << " " << immed << " " << (regs[rs] < immed);
     regs[rt] = (regs[rs] < immed);
 }
 
