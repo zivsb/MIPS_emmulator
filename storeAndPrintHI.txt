@@ -34,7 +34,7 @@ slti $t4, $t7, 10
 
 . . . IF NOT JUMP TO EXIT
 beq $t4, $0, 0xE
-0x1180000E
+0x1180000D
 
 LOAD 4 INTO $v0 FOR LATER SYSCALL
 lui $v0, 0x00000004
@@ -54,7 +54,7 @@ addi $t7, $t7, 1
 
 JUMP TO TOP OF LOOP
 j 0x8
-0x08000008
+0x08000007
 
 ##EXIT OF LOOP
 
@@ -64,4 +64,4 @@ lui $v0, 0x0000000A
 
 SYSCALL
 syscall
-0
+12

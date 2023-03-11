@@ -131,7 +131,7 @@ void CPU::sw(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::addi(uint8_t rs, uint8_t rt, uint16_t immed) {
-    cout << "In addi: " << regs[rt] << endl;
+    // cout << "In addi: " << regs[rt] << endl;
     regs[rt] = regs[rs] + immed;
 }
 
@@ -144,12 +144,12 @@ void CPU::ori(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::beq(uint8_t rs, uint8_t rt, uint16_t immed) {
-    cout << "Running beq" << endl;
-    cout << regs[rs] << " " << regs[rt] << endl;
-    cout << *pc << endl;
+    // cout << "Running beq" << endl;
+    // cout << regs[rs] << " " << regs[rt] << endl;
+    // cout << *pc << endl;
     if(regs[rs] == regs[rt]) {
         *pc = immed;
-        cout << "PC has been changed to " << *pc << endl;
+        // cout << "PC has been changed to " << *pc << endl;
     }
 }
 
@@ -160,7 +160,7 @@ void CPU::bne(uint8_t rs, uint8_t rt, uint16_t immed) {
 }
 
 void CPU::slti(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed) {
-    cout << "In SLTI: " << regs[rs] << " " << immed << " " << (regs[rs] < immed);
+    // cout << "In SLTI: " << regs[rs] << " " << immed << " " << (regs[rs] < immed) << endl;
     regs[rt] = (regs[rs] < immed);
 }
 
