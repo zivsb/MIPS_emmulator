@@ -26,7 +26,7 @@ int CPU::exec(uint32_t instruction) throw(SuccessfulQuit, Error) {
     uint16_t immed = (instruction & 0x0000FFFF);
     uint32_t address = (instruction & 0x03FFFFFF);
 
-    cout << "Executing: " << (instruction)  << endl;
+    // cout << "Executing: " << (instruction)  << endl;
     
     try {
 

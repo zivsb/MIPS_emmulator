@@ -1,4 +1,6 @@
 # MIPS_emmulator
-Project for CMPTGCS_1B
+## Project for CMPTGCS_1B Created by Peiyang Song and Ziv Weissman
 
-To see this run a basic script run "make run" or compile and run ./out and copy and paste the 10-digit integer values at the end of each chunk of text in the storeAndPrintHI.txt file.
+<a href="{https://drive.google.com/file/d/161vrtKg-xAKOXflVabYhqqd9-HBka9oC/view?usp=share_link}" title="Project Preview"><img src="./VideoPreview.png" alt="View Preview Vid" /></a>
+
+To-Do: Everything else for the read-me. Do what you think but I think it would be good to just describe the file structure, the commands we implemented and the ones we didn't, and some insight into how the project works. Thanks.
