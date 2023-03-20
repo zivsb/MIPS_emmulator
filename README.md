@@ -2,7 +2,7 @@
 
 ## Project overview
 
-This project develops a MIPS emulator in C++, by Peiyang Song* and Ziv Weissman* (names sorted by alphabet instead of evaluation of contribution). This is designed as the authors' final project for the W23 CMPTGCS 1B (Computer Organization and Logic Design) class co-taught by Dr. Jonathan Balkind and Dr. Ziad Matni (both at UCSB CoE CS, names sorted by alphabet). The authors would like to thank them for their invaluable advice and amazing lectures.
+This project develops a MIPS emulator in C++, by Peiyang Song* and Ziv Weissman* (names sorted by alphabet instead of evaluation of contribution). This is designed as the authors' final project for the W23 CMPTGCS 1B (Computer Organization and Logic Design) class co-taught by Professor Jonathan Balkind and Professor Ziad Matni (both at UCSB CoE CS, names sorted by alphabet). The authors would like to thank them for their invaluable advice and amazing lectures.
 
 *BS candidate for Computer Science, College of Creative Studies (CCS), University of California Santa Barbara (UCSB).
 
@@ -103,4 +103,4 @@ In this section, we describe several core features that our MIPS simulator suppo
 
 ## Acknowledgement
 
-Above we present all the main information for this project. The authors would like to once again thank Dr. Jonathan Balkind for his direct guidance of this project, which would have no chance to come true without his generous and professional help.
+Above we present all the main information for this project. The authors would like to once again thank Professor Jonathan Balkind for his direct guidance of this project, which would have no chance to come true without his generous and professional help.
